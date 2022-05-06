@@ -1,0 +1,6 @@
+requests
+pandas
+python-dateutil
+fastparquet
+gtfs-realtime-bindings
+git+https://git@github.com/wearefair/protobuf-to-dict

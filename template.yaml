@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  nycbuswatcher-gtfsrt-lambda
+
+  Sample SAM Template for nycbuswatcher-gtfsrt-lambda
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  NYCBuswatcherGTFSRTFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: nycbuswatcher_gtfsrt_lambda/
+      Handler: app.lambda_handler
+      # MemorySize: 512
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        NYCBuswatcherGTFSRT:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /nycbuswatcher_gtfsrt_lambda
+            Method: get
+      Environment:
+        Variables:
+          TZ: "America/New_York"
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: 'arn:aws:secretsmanager:us-east-1:870747888580:secret:api_key_nyct_mta_bus_siri-uFRnkM'
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: 'arn:aws:secretsmanager:us-east-1:870747888580:secret:LambdaDeveloperKeys-Mubc5G'
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  NYCBuswatcherGTFSRTApi:
+    Description: "API Gateway endpoint URL for Prod stage for NYCBuswatcherGTFSRT function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  NYCBuswatcherGTFSRTFunction:
+    Description: "NYCBuswatcherGTFSRT Lambda Function ARN"
+    Value: !GetAtt NYCBuswatcherGTFSRTFunction.Arn
+  NYCBuswatcherGTFSRTFunctionIamRole:
+    Description: "Implicit IAM Role created for NYCBuswatcherGTFSRT function"
+    Value: !GetAtt NYCBuswatcherGTFSRTFunctionRole.Arn
