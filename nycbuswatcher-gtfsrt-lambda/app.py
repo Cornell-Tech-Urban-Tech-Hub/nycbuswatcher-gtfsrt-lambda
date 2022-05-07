@@ -55,7 +55,7 @@ def lambda_handler(event, context):
     # convert timestamp
     positions_df['vehicle.timestamp'] = pd.to_datetime(positions_df['vehicle.timestamp'], unit="s")
     
-    # # this is essential or else pd.to_parquet dies without warning
+    ## FIXME: might be needed for a) parquet writer to work or b) Athena to read timestamp properly 
     # positions_df['vehicle.timestamp'] = positions_df['vehicle.timestamp'].dt.tz_localize(None)
     
     ################################################################## 
@@ -85,6 +85,6 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": f"done. wrote {positions_df['route_short'].nunique()} routes and {len(positions_df)} buses to S3.",
+            "message": f"done. wrote {positions_df['vehicle.trip.route_id'].nunique()} routes and {len(positions_df)} buses to S3.",
         }),
     }    
