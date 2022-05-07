@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "nycbuswatcher-gtfsrt-lambda:app.lambda_handler (python3.9)",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "${workspaceFolder}/nycbuswatcher-gtfsrt-lambda",
+                "lambdaHandler": "app.lambda_handler"
+            },
+            "lambda": {
+                "runtime": "python3.9",
+                "payload": {
+                    "path": "./events/event.json"
+                },
+                "environmentVariables": {}
+            }
+        }
+    ]
+}

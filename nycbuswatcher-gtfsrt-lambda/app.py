@@ -3,7 +3,6 @@ from secret_helper import get_secret
 from google.transit import gtfs_realtime_pb2
 from protobuf_to_dict import protobuf_to_dict
 import pandas as pd
-from dateutil import parser #TODO: remove?
 import requests
 import datetime as dt
 import boto3
@@ -51,7 +50,13 @@ def lambda_handler(event, context):
 
     # convert dict to dataframe
     positions_df=pd.json_normalize(buses_dict['entity'])
-
+    
+    # convert timestamp
+    positions_df['vehicle.timestamp'] = pd.to_datetime(positions_df['vehicle.timestamp'], unit="s")
+    
+    
+    # this is essential or else pd.to_parquet dies without warning
+    positions_df['vehicle.timestamp'] = positions_df['vehicle.timestamp'].dt.tz_localize(None)
     
     ################################################################## 
     # dump S3 as parquet
@@ -60,7 +65,11 @@ def lambda_handler(event, context):
     # dump to instance ephemeral storage 
     timestamp = dt.datetime.now().replace(microsecond=0)
     filename=f"{system_id}_{timestamp}.parquet".replace(" ", "_").replace(":", "_")
-    positions_df.to_parquet(f"/tmp/{filename}", times='int96')
+    try:
+        positions_df.to_parquet(f"/tmp/{filename}", engine="pyawrrow", times='int96')
+        # positions_df.to_parquet(f"/tmp/{filename}")
+    except Exception as e:
+        print(e)
 
     # upload to S3
     source_path=f"/tmp/{filename}" 

@@ -1,6 +1,5 @@
 requests
 pandas
-python-dateutil
-fastparquet
+pyarrow
 gtfs-realtime-bindings
 git+https://git@github.com/wearefair/protobuf-to-dict
