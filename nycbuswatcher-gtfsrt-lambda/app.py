@@ -66,7 +66,7 @@ def lambda_handler(event, context):
     timestamp = dt.datetime.now().replace(microsecond=0)
     filename=f"{system_id}_{timestamp}.parquet".replace(" ", "_").replace(":", "_")
 
-    #FIXME: its clear we are running out of memory, but can't seem to increase it (at least on desktop)
+    #FIXME: its clear we are running out of memory in local testing, but can't seem to increase it (at least on desktop)
     positions_df.to_parquet(f"/tmp/{filename}", times='int96')
 
     # upload to S3
