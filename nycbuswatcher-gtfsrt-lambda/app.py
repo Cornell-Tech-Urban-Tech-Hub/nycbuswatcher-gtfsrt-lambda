@@ -7,6 +7,7 @@ import requests
 import datetime as dt
 import boto3
 
+
 def lambda_handler(event, context):
 
     ################################################################## 
@@ -54,9 +55,8 @@ def lambda_handler(event, context):
     # convert timestamp
     positions_df['vehicle.timestamp'] = pd.to_datetime(positions_df['vehicle.timestamp'], unit="s")
     
-    
-    # this is essential or else pd.to_parquet dies without warning
-    positions_df['vehicle.timestamp'] = positions_df['vehicle.timestamp'].dt.tz_localize(None)
+    # # this is essential or else pd.to_parquet dies without warning
+    # positions_df['vehicle.timestamp'] = positions_df['vehicle.timestamp'].dt.tz_localize(None)
     
     ################################################################## 
     # dump S3 as parquet
@@ -65,11 +65,9 @@ def lambda_handler(event, context):
     # dump to instance ephemeral storage 
     timestamp = dt.datetime.now().replace(microsecond=0)
     filename=f"{system_id}_{timestamp}.parquet".replace(" ", "_").replace(":", "_")
-    try:
-        positions_df.to_parquet(f"/tmp/{filename}", engine="pyawrrow", times='int96')
-        # positions_df.to_parquet(f"/tmp/{filename}")
-    except Exception as e:
-        print(e)
+
+    #FIXME: its clear we are running out of memory, but can't seem to increase it (at least on desktop)
+    positions_df.to_parquet(f"/tmp/{filename}", times='int96')
 
     # upload to S3
     source_path=f"/tmp/{filename}" 
@@ -82,6 +80,7 @@ def lambda_handler(event, context):
     s3 = session.resource('s3')
     result = s3.Bucket(aws_bucket_name).upload_file(source_path,remote_path)
 
+    
     # report back to invoker
     return {
         "statusCode": 200,
