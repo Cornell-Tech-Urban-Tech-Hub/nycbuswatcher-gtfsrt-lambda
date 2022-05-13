@@ -52,12 +52,12 @@ def lambda_handler(event, context):
     # convert dict to dataframe
     positions_df=pd.json_normalize(buses_dict['entity'])
     
-    # convert timestamp
-    positions_df['vehicle.timestamp'] = pd.to_datetime(positions_df['vehicle.timestamp'], unit="s")
-    
-    ## FIXME: might be needed for a) parquet writer to work or b) Athena to read timestamp properly 
-    # positions_df['vehicle.timestamp'] = positions_df['vehicle.timestamp'].dt.tz_localize(None)
-    
+    # convert timestamp is 3 steps
+    # 1 convert POSIX timestamp to datetime
+    # 2 tell pandas its UTC
+    # 3 convert the offset to local time #FIXME: should timezone this from os.environ['TZ']
+    positions_df['vehicle.timestamp'] = pd.to_datetime(positions_df['vehicle.timestamp'], unit="s").dt.tz_localize('UTC').dt.tz_convert('America/New_York')
+
     ################################################################## 
     # dump S3 as parquet
     ##################################################################   
@@ -66,7 +66,6 @@ def lambda_handler(event, context):
     timestamp = dt.datetime.now().replace(microsecond=0)
     filename=f"{system_id}_{timestamp}.parquet".replace(" ", "_").replace(":", "_")
 
-    #FIXME: its clear we are running out of memory in local testing, but can't seem to increase it (at least on desktop)
     positions_df.to_parquet(f"/tmp/{filename}", times='int96')
 
     # upload to S3
