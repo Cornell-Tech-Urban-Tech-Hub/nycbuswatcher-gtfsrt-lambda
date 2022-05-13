@@ -52,8 +52,7 @@ def lambda_handler(event, context):
     # convert dict to dataframe
     positions_df=pd.json_normalize(buses_dict['entity'])
     
-    #FIXME: even after this, it gets converted back to UTC when dumping to parquet
-    # convert timestamp is 3 steps
+    # convert timestamp is 4 steps to get local time recorded properly in parquet
     # 1 convert POSIX timestamp to datetime
     positions_df['vehicle.timestamp'] = pd.to_datetime(positions_df['vehicle.timestamp'], unit="s")
     # 2 tell pandas its UTC
