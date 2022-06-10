@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import datetime as dt
 import boto3
-
+import os
 
 def lambda_handler(event, context):
 
@@ -78,6 +78,11 @@ def lambda_handler(event, context):
     s3 = session.resource('s3')
     result = s3.Bucket(aws_bucket_name).upload_file(source_path,remote_path)
 
+    # clean up /tmp
+    try:
+        os.remove(source_path)
+    except:
+        pass
     
     # report back to invoker
     return {
